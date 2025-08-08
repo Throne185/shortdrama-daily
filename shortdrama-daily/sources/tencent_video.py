@@ -1,56 +1,47 @@
 from __future__ import annotations
 """
-腾讯视频短剧公开页抓取（占位版）
-- 仅示例：保留 URL 与选择器占位，方便后续完善
-- 若抓取失败则回退到示例数据
+腾讯视频短剧公开页抓取（Playwright 优先）
+- 先尝试用 Playwright 渲染频道页；失败则返回空，由上层聚合器回退
+- 若聚合器无可用来源，再由上层回退到 sample
 """
 
 import json
-import time
+import asyncio
 from typing import List, Dict, Any
-import requests
 from bs4 import BeautifulSoup
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
-}
+from .common_playwright import browser_context
 
-# 公开列表页（示例/占位）— 需人工确认
+# 公开列表页（占位，需要根据实际DOM完善）
 TENCENT_SHORT_DRAMA_URLS = [
-    # TODO: 替换为腾讯视频短剧/竖短剧频道页的实际 URL
-    # "https://v.qq.com/channel/shortdrama"  # 占位
+    "https://v.qq.com/channel/short_drama",
 ]
 
 
-def fetch_list() -> List[Dict[str, Any]]:
+async def _fetch_page(url: str) -> List[Dict[str, Any]]:
     items: List[Dict[str, Any]] = []
-    for url in TENCENT_SHORT_DRAMA_URLS:
-        try:
-            resp = requests.get(url, headers=HEADERS, timeout=10)
-            resp.raise_for_status()
-            soup = BeautifulSoup(resp.text, "lxml")
-            # TODO: 根据真实 DOM 结构编写解析逻辑
-            # 示例：for card in soup.select(".drama-card"):
-            #   title = card.select_one(".title").get_text(strip=True)
-            #   poster = card.select_one("img")["src"]
-            #   items.append({"title": title, "poster": poster, ...})
-            time.sleep(1.2)
-        except Exception:
-            continue
-    return items
-
-
-def fallback_sample() -> Dict[str, Any]:
-    with open("shortdrama-daily/data/sample_items.json", "r", encoding="utf-8") as f:
-        data = json.load(f)
-        # 标记来源为 sample，便于上层写入正确的 latest.json
-        data["_source"] = "sample"
-        return data
+    async with browser_context() as ctx:
+        page = await ctx.new_page()
+        await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+        # 适度等待动态渲染
+        await page.wait_for_timeout(1500)
+        html = await page.content()
+        soup = BeautifulSoup(html, "lxml")
+        # TODO: 根据真实DOM结构实现选择器
+        # 示例（占位）：
+        # for card in soup.select(".drama-card"):
+        #     title = card.select_one(".title").get_text(strip=True)
+        #     poster = card.select_one("img")["src"]
+        #     items.append({"title": title, "platform": "腾讯视频", "poster": poster, "tags": [], "highlight": ""})
+        return items
 
 
 def get_data() -> Dict[str, Any]:
-    items = fetch_list()
-    if not items:
-        return fallback_sample()
-    return {"items": items, "upcoming": [], "_source": "public_pages"}
+    try:
+        tasks = [_fetch_page(u) for u in TENCENT_SHORT_DRAMA_URLS]
+        results = asyncio.get_event_loop().run_until_complete(asyncio.gather(*tasks))
+        items = [it for sub in results for it in sub]
+        return {"items": items, "upcoming": [], "_source": "public_pages" if items else "empty"}
+    except Exception:
+        return {"items": [], "upcoming": [], "_source": "empty"}
 

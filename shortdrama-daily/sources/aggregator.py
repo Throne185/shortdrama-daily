@@ -1,6 +1,6 @@
 from __future__ import annotations
 """
-聚合多平台公开页数据：腾讯视频 / 爱奇艺 / 优酷 / 芒果TV / 快看短剧 / 快手小剧场
+聚合多平台公开页数据：腾讯视频 / 爱奇艺 / 优酷 / 芒果TV / 快看短剧 / 快手小剧场 / 短剧天堂(聚合)
 - 设计为“可插拔”，后续可加入红果/河马剧场（若有公开H5页或开放接口）
 - 只汇入 _source == "public_pages" 的条目；忽略 sample/占位数据
 """
@@ -37,6 +37,7 @@ def gather_data() -> Dict[str, Any]:
         "mgtv",
         "kuaikan",
         "kuaishou",
+        "tiantianys",
         # 预留：红果/河马（若后续有合规公开H5页）
         # "hongguo",
         # "hema",

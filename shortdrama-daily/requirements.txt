@@ -4,7 +4,5 @@ pydantic>=2.7.0
 python-slugify>=8.0.4
 beautifulsoup4>=4.12.3
 lxml>=5.2.0
-# 如需动态页面与更强健抓取，可启用 playwright：
-# playwright>=1.47.0
-# playwright-stealth>=1.0.6
+playwright>=1.47.0
 
