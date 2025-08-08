@@ -1,19 +1,18 @@
 from __future__ import annotations
 """
-聚合多平台公开页数据：腾讯视频 / 爱奇艺 / 优酷 / 芒果TV
+聚合多平台公开页数据：腾讯视频 / 爱奇艺 / 优酷 / 芒果TV / 快看短剧
 - 设计为“可插拔”，后续可加入红果/河马剧场（若有公开H5页或开放接口）
-- 若所有来源都为空，则由上层回退到 sample
+- 只汇入 _source == "public_pages" 的条目；忽略 sample/占位数据
 """
 from typing import Dict, Any, List
 
 
 def _safe_get(module_name: str) -> Dict[str, Any]:
     try:
-        # 直接从顶层 sources 包导入子模块
         mod = __import__(f"sources.{module_name}", fromlist=["get_data"])  # type: ignore
         return mod.get_data()
     except Exception:
-        return {"items": [], "upcoming": []}
+        return {"items": [], "upcoming": [], "_source": "empty"}
 
 
 def _dedupe_by_title(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -36,7 +35,8 @@ def gather_data() -> Dict[str, Any]:
         "iqiyi",
         "youku",
         "mgtv",
-        # 预留：红果/河马（若后续发现可合规的公开H5页）
+        "kuaikan",
+        # 预留：红果/河马（若后续有合规公开H5页）
         # "hongguo",
         # "hema",
     ]
@@ -45,6 +45,8 @@ def gather_data() -> Dict[str, Any]:
 
     for s in sources:
         data = _safe_get(s)
+        if data.get("_source") != "public_pages":
+            continue
         items = data.get("items", [])
         upcoming = data.get("upcoming", [])
         if items:
