@@ -8,8 +8,8 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
-    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,21 +18,28 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: shortdrama-daily/requirements.txt
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r shortdrama-daily/requirements.txt
 
-      - name: Install Playwright browsers (Chromium)
+      - name: Install Playwright browsers (Chromium + deps)
         run: |
-          python -m playwright install chromium
+          python -m playwright install --with-deps chromium
 
       - name: Generate digest (public pages via Playwright)
         env:
           PYTHONUNBUFFERED: "1"
         run: |
           python shortdrama-daily/run_daily.py
+
+      - name: Show status
+        run: |
+          echo "Generated files:" && ls -la dist || true
+          echo "latest.json:" && cat dist/latest.json || true
 
       - name: Archive dist
         uses: actions/upload-artifact@v4
