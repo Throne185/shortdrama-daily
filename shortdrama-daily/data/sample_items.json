@@ -1,0 +1,40 @@
+{
+  "items": [
+    {
+      "title": "样例·通勤路上不敢快进",
+      "platform": "腾讯视频",
+      "status": "更新中",
+      "poster": "https://via.placeholder.com/216x304.png?text=Poster1",
+      "tags": ["反转", "甜爽"],
+      "highlight": "两集三反转，节奏极快；题材贴近打工人，细节真实。",
+      "comment": {"content": "坐地铁看完一季，回到工位还在回味最后一幕。", "source": "网友（平台公开评论）"}
+    },
+    {
+      "title": "样例·她从不按套路出牌",
+      "platform": "爱奇艺",
+      "status": "全12集",
+      "poster": "https://via.placeholder.com/216x304.png?text=Poster2",
+      "tags": ["爽感", "群像"],
+      "highlight": "人物关系像齿轮一样咬合，越看越上头。",
+      "comment": null
+    },
+    {
+      "title": "样例·小城也有大风浪",
+      "platform": "芒果TV",
+      "status": "更新至第10集",
+      "poster": "https://via.placeholder.com/216x304.png?text=Poster3",
+      "tags": ["现实", "反差"],
+      "highlight": "小人物的倔强与温柔，台词不油腻。",
+      "comment": {"content": "笑点和泪点都精准，不拖泥带水。", "source": "网友（平台公开评论）"}
+    }
+  ],
+  "upcoming": [
+    {
+      "title": "样例·夜色将至",
+      "platform": "优酷",
+      "date": "08/12",
+      "points": "双主角互抬剧情，冲突密集。"
+    }
+  ]
+}
+

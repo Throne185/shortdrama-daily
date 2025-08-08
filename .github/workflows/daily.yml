@@ -1,0 +1,37 @@
+name: Daily Short Drama Digest
+
+on:
+  schedule:
+    # 每天北京时间 08:20 运行（UTC 00:20）
+    - cron: '20 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r shortdrama-daily/requirements.txt
+
+      - name: Generate digest (public pages)
+        run: |
+          python shortdrama-daily/run_daily.py
+
+      - name: Archive dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-dist-${{ github.run_id }}
+          path: |
+            dist/**
+          if-no-files-found: error
+
